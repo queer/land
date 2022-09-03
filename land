@@ -36,12 +36,12 @@ base_dir=$(pwd)
 cleanup
 
 log "setting up requirements..."
+git submodule init
+git submodule update --recursive --remote --progress
 cd hcsshim
 go build ./cmd/tar2ext4/
 mv tar2ext4 $base_dir/tar2ext4
 cd $base_dir
-git submodule init
-git submodule update --recursive --remote --progress
 
 log "extracting docker image..."
 
