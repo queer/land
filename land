@@ -62,7 +62,7 @@ log "extracting rootfs layers..."
 # Config file contains cmd + env
 config_file=$(cat manifest.json | jq -r '.[].Config')
 command=($(cat $config_file | jq -r '.config.Cmd | @sh' | tr -d \'))
-command_args=$(cat $config_file | jq -r 'del(.config.Cmd[0])' | sed -e 's/^\[//' -e 's/^]//' | tr '\n' ' ')
+command_args=$(cat $config_file | jq -r 'del(.config.Cmd[0]).config.Cmd' | sed -e 's/^\[//' -e 's/^]//' | tr '\n' ' ')
 env=($(cat $config_file | jq -r '.config.Env | @sh' | tr -d \'))
 
 # Manifest contains layers
