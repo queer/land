@@ -29,13 +29,13 @@ func main() {
 	exe, err := exec.LookPath("%EXE%")
 	failFast(err)
 
-	fmt.Println("init: exe =", exe, "args =", finalArgs, "env =", finalEnv)
-
 	// Run entrypoint
+	fmt.Println("init: entrypoint: exe =", exe, "args =", finalArgs, "env =", finalEnv)
 	err = exec.Command(entrypoint, entrypointArgs...).Run()
 	failFast(err)
 
 	// Run cmd
+	fmt.Println("init: cmd: exe =", exe, "args =", finalArgs, "env =", finalEnv)
 	err = syscall.Exec(exe, finalArgs, finalEnv)
 	failFast(err)
 }
