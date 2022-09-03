@@ -10,3 +10,10 @@ docker image -> firecracker vm!
 # launch the vm!
 ./launch
 ```
+
+### deps
+
+- golang ;-;
+- git
+- jq
+- e2fsprogs

@@ -103,6 +103,7 @@ cd rootfs
 tar -cf ../rootfs.tar *
 cd ..
 $base_dir/tar2ext4 -i ./rootfs.tar -o $base_dir/rootfs.ext4
+tune2fs -O ^read-only $base_dir/rootfs.ext4
 
 cd $base_dir
 
