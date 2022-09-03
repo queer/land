@@ -99,4 +99,4 @@ cleanup
 
 log "all done!"
 log "run with:"
-echo "  firecracker --no-api --config-file vmconfig.json"
+echo "  firecracker --no-api --config-file vm_config.json"
