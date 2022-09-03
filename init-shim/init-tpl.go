@@ -35,21 +35,21 @@ func main() {
 		entrypointExec.Env = finalEnv
 		err := entrypointExec.Run()
 		// err := syscall.Exec(entrypoint, []string{entrypointArgs[0]}, finalEnv)
-		failFast(err)
+		failFast(err, "entrypointExec.Run()")
 	} else {
 		// Look up the exe since syscall.Exec doesn't
 		exe, err := exec.LookPath(exe)
-		failFast(err)
+		failFast(err, "cmd exe resolve")
 		// Run cmd
 		fmt.Println("init: cmd: exe =", exe, "args =", finalArgs, "env =", finalEnv)
 		err = syscall.Exec(exe, finalArgs, finalEnv)
-		failFast(err)
+		failFast(err, "cmd exec")
 	}
 }
 
-func failFast(err error) {
+func failFast(err error, ctx string) {
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println(ctx, "-", err.Error())
 		os.Exit(1)
 	}
 }
