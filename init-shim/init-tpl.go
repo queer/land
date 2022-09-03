@@ -8,7 +8,8 @@ import (
 func main() {
 	exe := "%EXE%"
 	finalArgs := []string{"%ARGS%"}
+	finalEnv := []string{"%ENV%"}
 	fmt.Println("init: exe =", exe, "args =", finalArgs)
 
-	syscall.Exec(exe, finalArgs, []string{})
+	syscall.Exec(exe, finalArgs, finalEnv)
 }
