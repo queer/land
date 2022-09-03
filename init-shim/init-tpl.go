@@ -15,7 +15,9 @@ func main() {
 
 	for _, arg := range finalEnv {
 		if strings.HasPrefix(arg, "PATH=") {
-			os.Setenv("PATH", arg[5:])
+			path := arg[5:]
+			os.Setenv("PATH", path)
+			fmt.Println("init: set PATH =", path)
 			break
 		}
 	}
