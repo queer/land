@@ -43,15 +43,15 @@ go build ./cmd/tar2ext4/
 mv tar2ext4 $base_dir/tar2ext4
 cd $base_dir
 
-log "extracting docker image..."
-
 docker_image=$1
 require $docker_image
 
 rm -rf ./work
 mkdir -p ./work
 
+log "fetching docker image as needed..."
 docker pull $docker_image
+log "extracting docker image..."
 docker save $docker_image > work/image.tar
 
 cd work
@@ -62,6 +62,7 @@ log "extracting rootfs layers..."
 # Config file contains cmd + env
 config_file=$(cat manifest.json | jq -r '.[].Config')
 command=($(cat $config_file | jq -r '.config.Cmd | @sh' | tr -d \'))
+command_args=$(cat $config_file | jq -r '.config.Cmd' | sed -e 's/^\[//' -e 's/^]//' | tr '\n' ' ')
 env=($(cat $config_file | jq -r '.config.Env | @sh' | tr -d \'))
 
 # Manifest contains layers
@@ -79,13 +80,14 @@ cd ..
 cp $base_dir/init-shim/init-tpl.go ./init-shim/init.go
 # Template processing
 sed -i -e "s|%EXE%|${command[0]}|" ./init-shim/init.go
-sed -i -e "s|%ENV%|$env|" ./init-shim/init.go
-sed -i -e "s|\"%ARGS%\"|${command[@]:1}|" ./init-shim/init.go
+sed -i -e "s|%ENV%|${env}|" ./init-shim/init.go
+sed -i -e "s|\"%ARGS%\"|${command_args}|" ./init-shim/init.go
+cat ./init-shim/init.go
 # Build minimal init
 go build ./init-shim/init.go
 # Drop init into rootfs
 cd ./work/
-mkdir rootfs/sbin
+mkdir -pv rootfs/sbin
 mv $base_dir/init rootfs/sbin/init
 
 log "building final rootfs..."
