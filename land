@@ -19,18 +19,34 @@ function require() {
   fi
 }
 
+function cleanup() {
+  log "cleaning up..."
+  cd $base_dir
+  rm -rf ./work/
+  rm init-shim/init.go*
+}
+
 if [[ $# -eq 0 ]] ; then
     log "must supply docker image as first arg"
     exit 1
 fi
 
 base_dir=$(pwd)
+
+cleanup
+
+log "setting up requirements..."
+cd hcsshim
+go build ./cmd/tar2ext4/
+cd $base_dir
+
 log "extracting docker image..."
 
 docker_image=$1
 require $docker_image
 
-mkdir -p work
+rm -rf ./work
+mkdir -p ./work
 
 docker save $docker_image > work/image.tar
 
@@ -38,16 +54,36 @@ cd work
 tar -xf image.tar
 
 log "extracting rootfs layers..."
+
+# Config file contains cmd + env
+config_file=$(cat manifest.json | jq -r '.[].Config')
+command=($(cat $config_file | jq -r '.config.Cmd | @sh' | tr -d \'))
+env=($(cat $config_file | jq -r '.config.Env | @sh' | tr -d \'))
+
+# Manifest contains layers
 layers=($(cat manifest.json | jq -r '.[].Layers | @sh' | tr -d \'))
 
-mkdir ./rootfs
+# Extract rootfs layers in order to build the final rootfs
+mkdir -p ./rootfs
 for layer in $layers; do
   tar -xf $layer -C ./rootfs
 done
 
+log "setting up /sbin/init..."
+cd ..
+cp $base_dir/init-shim/init-tpl.go ./init-shim/init.go
+sed -i -e "s|%EXE%|${command[0]}|" ./init-shim/init.go
+sed -i -e "s|%ENV%|$env|" ./init-shim/init.go
+sed -i -e "s|\"%ARGS%\"|${command[@]:1}|" ./init-shim/init.go
+cat ./init-shim/init.go
+go build ./init-shim/init.go
+cd ./work/
+
 log "building final rootfs..."
+
+# tar it up and turn it into an ext4 image
+ls -lah rootfs
 tar -cf ./rootfs.tar ./rootfs/*
 $base_dir/tar2ext4 -i ./rootfs.tar -o $base_dir/rootfs.ext4
 
-log "cleaning up..."
-cd $base_dir && rm -rf ./work/
+cleanup
