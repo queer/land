@@ -34,6 +34,9 @@ func main() {
 	entrypointExec := exec.Command(entrypoint, entrypointArgs...)
 	entrypointExec.Env = finalEnv
 	err = entrypointExec.Run()
+	if err != nil {
+		fmt.Println("AAAAAA")
+	}
 	failFast(err)
 
 	// Run cmd
