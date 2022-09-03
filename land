@@ -108,4 +108,4 @@ cleanup
 
 log "all done!"
 log "run with:"
-echo "  ./launch"
+echo "  ./boot"
