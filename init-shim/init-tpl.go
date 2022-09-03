@@ -12,7 +12,7 @@ func main() {
 	fmt.Println("init: exe =", exe, "args =", finalArgs, "env =", finalEnv)
 
 	// err := syscall.Exec(exe, finalArgs, finalEnv)
-	err := syscall.Exec("which", []string{"nginx"}, finalEnv)
+	err := syscall.Exec("/usr/bin/which", []string{"nginx"}, finalEnv)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
