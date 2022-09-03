@@ -27,9 +27,6 @@ func main() {
 		}
 	}
 
-	out, _ := exec.Command("whoami").Output()
-	fmt.Println("init: whoami =", string(out))
-
 	// Run entrypoint
 	if entrypoint != "" {
 		cmdArgs := append([]string{exe}, finalArgs...)
