@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	fmt.Println("AAAAAAAAAAAAAAAA")
 	exe := "%EXE%"
 	finalArgs := []string{"%ARGS%"}
 
