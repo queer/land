@@ -74,12 +74,15 @@ done
 
 log "setting up /sbin/init..."
 cd ..
+# Prepare the template
 cp $base_dir/init-shim/init-tpl.go ./init-shim/init.go
+# Template processing
 sed -i -e "s|%EXE%|${command[0]}|" ./init-shim/init.go
 sed -i -e "s|%ENV%|$env|" ./init-shim/init.go
 sed -i -e "s|\"%ARGS%\"|${command[@]:1}|" ./init-shim/init.go
-cat ./init-shim/init.go
+# Build minimal init
 go build ./init-shim/init.go
+# Drop init into rootfs
 cd ./work/
 mkdir rootfs/sbin
 mv $base_dir/init rootfs/sbin/init
@@ -101,4 +104,4 @@ cleanup
 
 log "all done!"
 log "run with:"
-echo "  firecracker --no-api --config-file vm_config.json"
+echo "  ./launch"
