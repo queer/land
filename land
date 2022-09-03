@@ -51,6 +51,7 @@ require $docker_image
 rm -rf ./work
 mkdir -p ./work
 
+docker pull $docker_image
 docker save $docker_image > work/image.tar
 
 cd work
