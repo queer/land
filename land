@@ -87,7 +87,9 @@ cp $base_dir/init rootfs/sbin/init
 log "building final rootfs..."
 
 # tar it up and turn it into an ext4 image
-tar -cf ./rootfs.tar ./rootfs/*
+cd rootfs
+tar -cf ../rootfs.tar *
+cd ..
 $base_dir/tar2ext4 -i ./rootfs.tar -o $base_dir/rootfs.ext4
 
 cd $base_dir
