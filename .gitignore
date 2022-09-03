@@ -1,6 +1,7 @@
-./work
-./rootfs.ext4
+/work
+/rootfs.ext4
 /tar2ext4
 /init
 /init-shim/init.go
 /hcsshim
+/kernel.bin

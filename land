@@ -23,7 +23,7 @@ function cleanup() {
   log "cleaning up..."
   cd $base_dir
   rm -rf ./work/
-  rm init-shim/init.go*
+  rm -f init-shim/init.go*
 }
 
 if [[ $# -eq 0 ]] ; then
@@ -78,12 +78,22 @@ sed -i -e "s|\"%ARGS%\"|${command[@]:1}|" ./init-shim/init.go
 cat ./init-shim/init.go
 go build ./init-shim/init.go
 cd ./work/
+mkdir rootfs/sbin
+cp $base_dir/init rootfs/sbin/init
 
 log "building final rootfs..."
 
 # tar it up and turn it into an ext4 image
-ls -lah rootfs
 tar -cf ./rootfs.tar ./rootfs/*
 $base_dir/tar2ext4 -i ./rootfs.tar -o $base_dir/rootfs.ext4
 
+cd $base_dir
+
+log "fetching kernel..."
+[ -e kernel.bin ] || wget https://s3.amazonaws.com/spec.ccfc.min/img/hello/kernel/hello-vmlinux.bin -O kernel.bin
+
 cleanup
+
+log "all done!"
+log "run with:"
+echo "  firecracker --no-api --config-file vmconfig.json"
