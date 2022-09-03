@@ -31,12 +31,11 @@ func main() {
 
 	// Run entrypoint
 	fmt.Println("init: entrypoint: exe =", entrypoint, "args =", entrypointArgs, "env =", finalEnv)
-	entrypointExec := exec.Command("/bin/sh", append([]string{entrypoint}, entrypointArgs...)...)
+	entrypointExec := exec.Command(entrypoint, entrypointArgs...)
 	entrypointExec.Env = finalEnv
+	fmt.Println("About to run entrypoint")
 	err = entrypointExec.Run()
-	if err != nil {
-		fmt.Println("AAAAAA")
-	}
+	fmt.Println("Ran entrypoint")
 	failFast(err)
 
 	// Run cmd
