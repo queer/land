@@ -8,7 +8,7 @@ docker image -> firecracker vm!
 # build the vm
 ./land <docker image[:tag]>
 # launch the vm!
-./launch
+./boot
 ```
 
 ### deps
