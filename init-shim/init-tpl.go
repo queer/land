@@ -11,5 +11,8 @@ func main() {
 	finalEnv := []string{"%ENV%"}
 	fmt.Println("init: exe =", exe, "args =", finalArgs)
 
-	syscall.Exec(exe, finalArgs, finalEnv)
+	err := syscall.Exec(exe, finalArgs, finalEnv)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
