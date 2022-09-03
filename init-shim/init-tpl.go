@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
+	"syscall"
 )
 
 func main() {
@@ -10,14 +10,5 @@ func main() {
 	exe := "%EXE%"
 	finalArgs := []string{"%ARGS%"}
 
-	fmt.Println("cmd prep")
-	cmd := exec.Command(exe, finalArgs...)
-	fmt.Println("cmd prerun")
-	err := cmd.Run()
-	fmt.Println("cmd run")
-
-	if err != nil {
-		fmt.Println("kaboom")
-		fmt.Println(err.Error())
-	}
+	syscall.Exec(exe, finalArgs, []string{})
 }
