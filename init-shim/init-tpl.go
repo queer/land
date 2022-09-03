@@ -3,12 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"syscall"
 )
 
 func main() {
-	exe := "%EXE%"
+	exe, err := exec.LookPath("%EXE%")
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
 	finalArgs := []string{"%ARGS%"}
 	finalEnv := []string{"%ENV%"}
 	fmt.Println("init: exe =", exe, "args =", finalArgs, "env =", finalEnv)
@@ -22,7 +28,7 @@ func main() {
 		}
 	}
 
-	err := syscall.Exec(exe, finalArgs, finalEnv)
+	err = syscall.Exec(exe, finalArgs, finalEnv)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
