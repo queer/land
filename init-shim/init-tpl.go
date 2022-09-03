@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	exe := "%EXE%"
 	finalArgs := []string{"%ARGS%"}
 	finalEnv := []string{"%ENV%"}
 	entrypoint := "%ENTRYPOINT%"
@@ -25,18 +26,17 @@ func main() {
 		}
 	}
 
-	// Look up the exe since syscall.Exec doesn't
-	exe, err := exec.LookPath("%EXE%")
-	failFast(err)
-
 	// Run entrypoint
 	if entrypoint != "" {
 		cmdArgs := append([]string{exe}, finalArgs...)
 		entrypointArgs = append(entrypointArgs, cmdArgs...)
 		fmt.Println("init: entrypoint: exe =", entrypoint, "args =", entrypointArgs, "env =", finalEnv)
-		err = syscall.Exec(exe, finalArgs, finalEnv)
+		err := syscall.Exec(exe, finalArgs, finalEnv)
 		failFast(err)
 	} else {
+		// Look up the exe since syscall.Exec doesn't
+		exe, err := exec.LookPath(exe)
+		failFast(err)
 		// Run cmd
 		fmt.Println("init: cmd: exe =", exe, "args =", finalArgs, "env =", finalEnv)
 		err = syscall.Exec(exe, finalArgs, finalEnv)
