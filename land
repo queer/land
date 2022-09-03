@@ -74,6 +74,7 @@ for layer in $layers; do
   log "extracting layer: $layer..."
   tar -xf $layer -C ./rootfs
 done
+exit 1
 
 log "setting up /sbin/init..."
 cd ..
