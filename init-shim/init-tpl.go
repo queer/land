@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -35,11 +34,8 @@ func main() {
 		entrypointExec := exec.Command(entrypoint, entrypointArgs...)
 		entrypointExec.Env = finalEnv
 
-		var outb, errb bytes.Buffer
-		entrypointExec.Stdout = &outb
-		entrypointExec.Stderr = &errb
 		err := entrypointExec.Run()
-		fmt.Println("out:", outb.String(), "err:", errb.String())
+		// fmt.Println("out:", outb.String(), "err:", errb.String())
 		failFast(err, "entrypoint exec")
 	} else {
 		// Look up the exe since syscall.Exec doesn't
