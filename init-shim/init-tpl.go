@@ -30,18 +30,19 @@ func main() {
 	failFast(err)
 
 	// Run entrypoint
-	fmt.Println("init: entrypoint: exe =", entrypoint, "args =", entrypointArgs, "env =", finalEnv)
-	entrypointExec := exec.Command(entrypoint, entrypointArgs...)
-	entrypointExec.Env = finalEnv
-	fmt.Println("About to run entrypoint")
-	err = entrypointExec.Run()
-	fmt.Println("Ran entrypoint")
-	failFast(err)
+	if entrypoint != "" {
+		fmt.Println("init: entrypoint: exe =", entrypoint, "args =", entrypointArgs, "env =", finalEnv)
 
-	// Run cmd
-	fmt.Println("init: cmd: exe =", exe, "args =", finalArgs, "env =", finalEnv)
-	err = syscall.Exec(exe, finalArgs, finalEnv)
-	failFast(err)
+		cmdArgs := append([]string{exe}, finalArgs...)
+		entrypointArgs = append(entrypointArgs, cmdArgs...)
+		err = syscall.Exec(exe, finalArgs, finalEnv)
+		failFast(err)
+	} else {
+		// Run cmd
+		fmt.Println("init: cmd: exe =", exe, "args =", finalArgs, "env =", finalEnv)
+		err = syscall.Exec(exe, finalArgs, finalEnv)
+		failFast(err)
+	}
 }
 
 func failFast(err error) {
