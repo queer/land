@@ -68,7 +68,10 @@ command_args=$(cat $config_file | jq -r 'del(.config.Cmd[0]).config.Cmd' | sed -
 
 entrypoint=$(cat $config_file | jq -r '.config.Entrypoint[0] | @sh' | tr -d \')
 entrypoint_args=$(cat $config_file | jq -r 'del(.config.Entrypoint[0]).config.Entrypoint' | sed -e 's/^\[//' -e 's/^]//' | tr '\n' ' ' | sed 's/ *$//g')
-echo $entrypoint_args
+
+if [ "$entrypoint" == "null" ]; then
+  entrypoint=""
+fi
 if [ "$entrypoint_args" == "null" ]; then
   entrypoint_args=""
 fi
@@ -98,8 +101,8 @@ sed -i -e "s|\"%ARGS%\"|${command_args}|" ./init-shim/init.go
 sed -i -e "s|%ENTRYPOINT%|${entrypoint:-}|" ./init-shim/init.go
 sed -i -e "s|\"%ENTRYPOINT_ARGS%\"|${entrypoint_args:-}|" ./init-shim/init.go
 
-# log "generated init:"
-# cat ./init-shim/init.go
+log "generated init:"
+cat ./init-shim/init.go
 
 # Build minimal init
 go build ./init-shim/init.go
