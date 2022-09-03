@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -26,16 +27,23 @@ func main() {
 		}
 	}
 
+	out, _ := exec.Command("whoami").Output()
+	fmt.Println("init: whoami =", string(out))
+
 	// Run entrypoint
 	if entrypoint != "" {
 		cmdArgs := append([]string{exe}, finalArgs...)
 		entrypointArgs = append(entrypointArgs, cmdArgs...)
-		fmt.Println("init: entrypoint: exe =", entrypoint, "args =", []string{entrypointArgs[0]}, "env =", finalEnv)
-		// entrypointExec := exec.Command(entrypoint, entrypointArgs...)
-		// entrypointExec.Env = finalEnv
-		// err := entrypointExec.Run()
-		err := syscall.Exec(entrypoint, []string{entrypointArgs[0]}, finalEnv)
-		failFast(err, "entrypointExec.Run()")
+		fmt.Println("init: entrypoint: exe =", entrypoint, "args =", entrypointArgs, "env =", finalEnv)
+		entrypointExec := exec.Command(entrypoint, entrypointArgs...)
+		entrypointExec.Env = finalEnv
+
+		var outb, errb bytes.Buffer
+		entrypointExec.Stdout = &outb
+		entrypointExec.Stderr = &errb
+		err := entrypointExec.Run()
+		fmt.Println("out:", outb.String(), "err:", errb.String())
+		failFast(err, "entrypoint exec")
 	} else {
 		// Look up the exe since syscall.Exec doesn't
 		exe, err := exec.LookPath(exe)
