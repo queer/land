@@ -30,7 +30,7 @@ func main() {
 	failFast(err)
 
 	// Run entrypoint
-	fmt.Println("init: entrypoint: exe =", exe, "args =", finalArgs, "env =", finalEnv)
+	fmt.Println("init: entrypoint: exe =", entrypoint, "args =", entrypointArgs, "env =", finalEnv)
 	entrypointExec := exec.Command(entrypoint, entrypointArgs...)
 	entrypointExec.Env = finalEnv
 	err = entrypointExec.Run()
