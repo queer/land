@@ -1,0 +1,3 @@
+[submodule "hcsshim"]
+	path = hcsshim
+	url = git@github.com:microsoft/hcsshim.git

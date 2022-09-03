@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+# tar2ext4 from https://github.com/microsoft/hcsshim
+
+set -euo pipefail
+
+function log() {
+    echo "[$(env TZ=UTC date +%Y-%m-%dT%H:%M:%S%z)] $*"
+}
+
+function require() {
+  if [ -z "${1}" ]; then
+    if [ -z "$2" ]; then
+      log "\$$1 is not set but must be set."
+    else
+      log "\$$2 is not set but must be set."
+    fi
+    exit 1
+  fi
+}
+
+if [[ $# -eq 0 ]] ; then
+    log "must supply docker image as first arg"
+    exit 1
+fi
+
+base_dir=$(pwd)
+log "extracting docker image..."
+
+docker_image=$1
+require $docker_image
+
+mkdir -p work
+
+docker save $docker_image > work/image.tar
+
+cd work
+tar -xf image.tar
+
+log "extracting rootfs layers..."
+layers=($(cat manifest.json | jq -r '.[].Layers | @sh' | tr -d \'))
+
+mkdir ./rootfs
+for layer in $layers; do
+  tar -xf $layer -C ./rootfs
+done
+
+log "building final rootfs..."
+tar -cf ./rootfs.tar ./rootfs/*
+$base_dir/tar2ext4 -i ./rootfs.tar -o $base_dir/rootfs.ext4
+
+log "cleaning up..."
+cd $base_dir && rm -rf ./work/
