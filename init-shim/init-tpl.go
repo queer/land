@@ -30,8 +30,11 @@ func main() {
 	if entrypoint != "" {
 		cmdArgs := append([]string{exe}, finalArgs...)
 		entrypointArgs = append(entrypointArgs, cmdArgs...)
-		fmt.Println("init: entrypoint: exe =", entrypoint, "args =", entrypointArgs, "env =", finalEnv)
-		err := syscall.Exec(exe, finalArgs, finalEnv)
+		fmt.Println("init: entrypoint: exe =", entrypoint, "args =", []string{entrypointArgs[0]}, "env =", finalEnv)
+		entrypointExec := exec.Command(entrypoint, entrypointArgs...)
+		entrypointExec.Env = finalEnv
+		err := entrypointExec.Run()
+		// err := syscall.Exec(entrypoint, []string{entrypointArgs[0]}, finalEnv)
 		failFast(err)
 	} else {
 		// Look up the exe since syscall.Exec doesn't
