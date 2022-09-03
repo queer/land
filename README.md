@@ -1,6 +1,6 @@
 # land
 
-<small>*(5 hours and 165 loc to get the mvp!)*</small>
+<sup><sup>*(5 hours and 165 loc to get the mvp!)*</sup></sup>
 
 docker image -> firecracker vm!
 
