@@ -105,8 +105,10 @@ cd ..
 $base_dir/tar2ext4 -i ./rootfs.tar -o $base_dir/rootfs.ext4
 # Remove the ro attr that tar2ext4 sets
 tune2fs -O ^read-only $base_dir/rootfs.ext4
+sync
 # Grow the rootfs to 1GB
 dd if=/dev/zero bs=1G seek=1 count=0 of=rootfs.ext4
+sync
 resize2fs rootfs.ext4 1G
 cd $base_dir
 
