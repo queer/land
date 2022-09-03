@@ -81,7 +81,7 @@ cp $base_dir/init-shim/init-tpl.go ./init-shim/init.go
 # Template processing
 sed -i -e "s|%EXE%|${command[0]}|" ./init-shim/init.go
 sed -i -e "s|\"%ENV%\"|${env}|" ./init-shim/init.go
-sed -i -e "s|\"%ARGS%\"|${command_args}|" ./init-shim/init.go
+sed -i -e "s|\"%ARGS%\"|${command_args}, \"error_log stderr\"|" ./init-shim/init.go
 log "generated init:"
 cat ./init-shim/init.go
 # Build minimal init
