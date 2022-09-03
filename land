@@ -51,7 +51,7 @@ mkdir -p ./work
 
 log "fetching docker image as needed..."
 docker pull $docker_image
-log "extracting docker image..."
+log "dumping docker image..."
 docker save $docker_image > work/image.tar
 
 cd work
@@ -66,11 +66,12 @@ command_args=$(cat $config_file | jq -r 'del(.config.Cmd[0]).config.Cmd' | sed -
 env=($(cat $config_file | jq -r '.config.Env' | sed -e 's/^\[//' -e 's/^]//' | tr '\n' ' '))
 
 # Manifest contains layers
-layers=($(cat manifest.json | jq -r '.[].Layers | @sh' | tr -d \'))
+layers=$(cat manifest.json | jq -r '.[].Layers | @sh' | tr -d \')
 
 # Extract rootfs layers in order to build the final rootfs
 mkdir -p ./rootfs
 for layer in $layers; do
+  log "extracting layer: $layer..."
   tar -xf $layer -C ./rootfs
 done
 
