@@ -32,6 +32,7 @@ if [[ $# -eq 0 ]] ; then
 fi
 
 base_dir=$(pwd)
+require $base_dir
 
 cleanup
 rm -f ./rootfs.ext4
@@ -107,7 +108,7 @@ sed -i -e "s|\"%ENTRYPOINT_ARGS%\"|${entrypoint_args:-}|" ./init-shim/init.go
 # Build minimal init
 go build ./init-shim/init.go
 
-# Drop init into rootfs
+log "relocating init to /sbin/init..."
 cd ./work/ # ./work
 mkdir -pv rootfs/sbin
 mv $base_dir/init rootfs/sbin/init
@@ -118,12 +119,14 @@ log "building final rootfs..."
 cd rootfs # ./work/rootfs
 tar -cf ../rootfs.tar *
 
+log "building ext4 image..."
 cd .. # ./work
 $base_dir/tar2ext4 -i ./rootfs.tar -o $base_dir/rootfs.ext4
 
 # Remove the ro attr that tar2ext4 sets
 tune2fs -O ^read-only $base_dir/rootfs.ext4
 
+log "growing rootfs..."
 # Grow the rootfs to 1GB
 dd if=/dev/zero bs=1G seek=1 count=0 of=$base_dir/rootfs.ext4
 resize2fs $base_dir/rootfs.ext4 1G
