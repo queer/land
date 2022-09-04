@@ -4,3 +4,4 @@
 /init
 /init-shim/init.go*
 /kernel.bin
+/.vscode
