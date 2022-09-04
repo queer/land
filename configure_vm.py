@@ -67,9 +67,6 @@ if cmdline == "":
 spacer()
 
 print("good job! :D")
-print("here's your config:")
-spacer()
-
 
 config = {
     "boot-source": {
@@ -86,11 +83,14 @@ config = {
         }
     ],
     "machine-config": {
-        "vcpu_count": vcpus,
-        "mem_size_mib": memory,
+        "vcpu_count": int(vcpus),
+        "mem_size_mib": int(memory),
         "smt": smt,
         "track_dirty_pages": False,
     },
 }
 
-print(json.dumps(config, indent=2))
+with open("./vm_config.json", "w") as f:
+    json.dump(config, f, indent=2)
+
+print("your vm config has been written to ./vm_config.json")

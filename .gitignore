@@ -5,3 +5,4 @@
 /init-shim/init.go*
 /kernel.bin
 /.vscode
+/vm_config.json
