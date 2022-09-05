@@ -108,6 +108,7 @@ sed -i -e "s|\"%ENTRYPOINT_ARGS%\"|${entrypoint_args:-}|" ./init-shim/init.go
 cd ./init-shim # ./init-shim
 go mod tidy -v
 log "okay that maybe worked, let's try building..."
+# We disable CGO here because it breaks on Alpine
 env CGO_ENABLED=0 go build ./init.go
 cd .. # .
 
