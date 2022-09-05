@@ -4,20 +4,7 @@
 
 set -euo pipefail
 
-function log() {
-    echo "[$(env TZ=UTC date +%Y-%m-%dT%H:%M:%S%z)] $*"
-}
-
-function require() {
-  if [ -z "${1}" ]; then
-    if [ -z "$2" ]; then
-      log "\$$1 is not set but must be set."
-    else
-      log "\$$2 is not set but must be set."
-    fi
-    exit 1
-  fi
-}
+source ./lib.sh
 
 function cleanup() {
   log "cleaning up..."
@@ -52,7 +39,13 @@ rm -rf ./work
 mkdir -p ./work
 
 log "fetching docker image as needed..."
-docker pull $docker_image
+# Check if image exists
+img=$(docker image ls | grep "$docker_image" || true)
+if [[ $img == "" ]]; then
+  log "image not found, fetching..."
+  docker pull $docker_image
+fi
+
 log "dumping docker image..."
 docker save $docker_image > work/image.tar
 
@@ -64,17 +57,23 @@ log "extracting rootfs layers..."
 # Config file contains cmd + env
 config_file=$(cat manifest.json | jq -r '.[].Config')
 
-command=$(cat $config_file | jq -r '.config.Cmd[0] | @sh' | tr -d \')
-command_args=$(cat $config_file | jq -r 'del(.config.Cmd[0]).config.Cmd' | sed -e 's/^\[//' -e 's/^]//' | tr '\n' ' ')
+command=$(cat $config_file | jq -r '.config.Cmd[0] | @sh' | tr -d \' | sed -e 's/ *$//g')
+command_args=$(cat $config_file | jq -r 'del(.config.Cmd[0]).config.Cmd' | sed -e 's/^\[//' -e 's/^]//' | tr '\n' ' ' | sed -e 's/&/\\&/g' -e 's/ *$//g')
 
-entrypoint=$(cat $config_file | jq -r '.config.Entrypoint[0] | @sh' | tr -d \')
-entrypoint_args=$(cat $config_file | jq -r 'del(.config.Entrypoint[0]).config.Entrypoint' | sed -e 's/^\[//' -e 's/^]//' | tr '\n' ' ' | sed 's/ *$//g')
+entrypoint=$(cat $config_file | jq -r '.config.Entrypoint[0] | @sh' | tr -d \' | sed -e 's/ *$//g')
+entrypoint_args=$(cat $config_file | jq -r 'del(.config.Entrypoint[0]).config.Entrypoint' | sed -e 's/^\[//' -e 's/^]//' | tr '\n' ' ' | sed -e 's/ *$//g' -e 's/&/\\&/g')
 
 if [ "$entrypoint" == "null" ]; then
   entrypoint=""
 fi
 if [ "$entrypoint_args" == "null" ]; then
   entrypoint_args=""
+fi
+if [ "$command" == "null" ]; then
+  command=""
+fi
+if [ "$command_args" == "null" ]; then
+  command_args=""
 fi
 
 env=($(cat $config_file | jq -r '.config.Env' | sed -e 's/^\[//' -e 's/^]//' | tr '\n' ' '))
@@ -106,12 +105,17 @@ sed -i -e "s|\"%ENTRYPOINT_ARGS%\"|${entrypoint_args:-}|" ./init-shim/init.go
 # cat ./init-shim/init.go
 
 # Build minimal init
-go build ./init-shim/init.go
+cd ./init-shim # ./init-shim
+go mod tidy -v
+log "okay that maybe worked, let's try building..."
+env CGO_ENABLED=0 go build ./init.go
+cd .. # .
 
 log "relocating init to /sbin/init..."
 cd ./work/ # ./work
-mkdir -pv rootfs/sbin
-mv $base_dir/init rootfs/sbin/init
+mkdir -pv rootfs/{sbin,dev,proc,run,sys,var}
+rm -f rootfs/sbin/init
+mv $base_dir/init-shim/init rootfs/sbin/init
 
 log "building final rootfs..."
 

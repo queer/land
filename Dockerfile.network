@@ -1,0 +1,9 @@
+FROM alpine:latest
+
+RUN apk add -U bash bind-tools busybox-extras curl \
+  iproute2 iputils jq mtr \
+  net-tools dhcpcd \
+  perl-net-telnet procps tcpdump tcptraceroute wget
+
+ENTRYPOINT ["/bin/bash"]
+# CMD ["/bin/bash"]

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+source ./lib.sh
+
+cidr_range="172.22.0.0/16"
+
+log "setting up networking..."
+log "note: land uses the ${cidr_range} cidr range"
+log "this process uses sudo! be aware!!!"
+
+log "but first, what's your primary network interface?"
+read -p "interface: " network_interface
+
+log "setting up bridge network..."
+# Set up the bridge network
+sudo ip link add name br0 type bridge
+# Tie the bridge to our CIDR range
+sudo ip addr add "${cidr_range}" dev br0
+sudo ip link set br0 up
+
+log "allowing ip forwarding..."
+sudo sysctl -w net.ipv4.ip_forward=1
+
+log "setting up iptables rules..."
+# NAT the VM
+sudo iptables --table nat --append POSTROUTING --out-interface $network_interface -j MASQUERADE
+sudo iptables --insert FORWARD --in-interface br0 -j ACCEPT
+
+log "building tap device..."
+
+# Set up tap device to route vm traffic through
+sudo ip tuntap add tap0 mode tap
+sudo ip addr add "${cidr_range}" tap0
+
+# Strap the tap device to the bridge
+sudo brctl addif br0 tap0
+sudo ip link set tap0 up
+
+log "Done!"

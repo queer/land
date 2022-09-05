@@ -17,5 +17,9 @@
     "mem_size_mib": 512,
     "smt": false,
     "track_dirty_pages": false
+  },
+  "network-interfaces": {
+    "iface_id": "eth0",
+    "host_dev_name": "tap0"
   }
 }

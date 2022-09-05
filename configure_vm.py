@@ -88,6 +88,7 @@ config = {
         "smt": smt,
         "track_dirty_pages": False,
     },
+    "network-interfaces": [{"iface_id": "eth0", "host_dev_name": "tap0"}],
 }
 
 with open("./vm_config.json", "w") as f:
